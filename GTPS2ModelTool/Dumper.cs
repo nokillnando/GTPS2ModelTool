@@ -63,18 +63,6 @@ public class Dumper
                             Console.WriteLine($"[DEBUG] Found default wheel {name}, extracting to {modelSetOutputDir}\\wheel_{resolvedWheelName}...");
                             DumpFile(wheelPath, specDb, Path.Combine(modelSetOutputDir, $"wheel_{resolvedWheelName}"));
                         }
-                        
-                        string tirePath = Path.Combine(Path.GetDirectoryName(path), "..", "..", "tire", "menu", name);
-                        if (!File.Exists(tirePath)) {
-                            tirePath = Path.Combine(Path.GetDirectoryName(path), "..", "..", "tire", "menu", "pdi_0000");
-                        }
-                        if (File.Exists(tirePath)) {
-                            string tireName = Path.GetFileNameWithoutExtension(tirePath);
-                            string resolvedTireName = ResolveCarTireName(specDb, name, false);
-                            if (string.IsNullOrEmpty(resolvedTireName)) resolvedTireName = ResolveCarName(specDb, tireName);
-                            Console.WriteLine($"[DEBUG] Found tire model {tireName}, extracting to {modelSetOutputDir}\\tire_{resolvedTireName}...");
-                            DumpFile(tirePath, specDb, Path.Combine(modelSetOutputDir, $"tire_{resolvedTireName}"));
-                        }
                     }
                     return;
                 }
@@ -115,14 +103,6 @@ public class Dumper
                         if (File.Exists(wheelPath)) {
                             string resolvedWheelName = ResolveCarName(specDb, name);
                             DumpFile(wheelPath, specDb, Path.Combine(modelSetOutputDir, $"wheel_{resolvedWheelName}"));
-                        }
-                        
-                        string tirePath = Path.Combine(Path.GetDirectoryName(path), "..", "..", "tire", "menu", name);
-                        if (!File.Exists(tirePath)) tirePath = Path.Combine(Path.GetDirectoryName(path), "..", "..", "tire", "menu", "pdi_0000");
-                        if (File.Exists(tirePath)) {
-                            string tireName = Path.GetFileNameWithoutExtension(tirePath);
-                            string resolvedTireName = ResolveCarName(specDb, tireName);
-                            DumpFile(tirePath, specDb, Path.Combine(modelSetOutputDir, $"tire_{resolvedTireName}"));
                         }
                     }
                     return;
@@ -937,60 +917,139 @@ public class Dumper
     public static string ResolveCarName(PDTools.SpecDB.Core.SpecDB specDb, string name)
     {
         string outName = $"{name}_dump";
-        if (specDb != null)
+        if (specDb == null) return outName;
+
+        // All known VARIATION locale suffixes - try them all in order
+        string[] locales = ["american", "japanese", "british", "french", "german", "italian", "spanish", "korean", "big5"];
+
+        // Helper: load (and cache) the string database for a given locale
+        PDTools.SpecDB.Core.Formats.StringDatabase GetLocaleStrDb(string locale)
         {
-            try {
-                var varTable = specDb.Tables["VARIATION" + specDb.LocaleName];
+            string sdbKey = $"{locale}_StrDB.sdb";
+            if (specDb.StringDatabases.TryGetValue(sdbKey, out var cached)) return cached;
+            string sdbPath = Path.Combine(specDb.FolderName, sdbKey);
+            if (!File.Exists(sdbPath)) return specDb.LocaleStringDatabase; // fallback
+            var loaded = PDTools.SpecDB.Core.Formats.StringDatabase.LoadFromFile(sdbPath);
+            specDb.StringDatabases[sdbKey] = loaded;
+            return loaded;
+        }
+
+        try {
+            foreach (var locale in locales)
+            {
+                string varTableKey = "VARIATION" + locale;
+                if (!specDb.Tables.ContainsKey(varTableKey)) continue;
+
+                var varTable = specDb.Tables[varTableKey];
                 if (!varTable.IsLoaded) varTable.LoadAllRows(specDb);
-                
+
+                // After LoadAllRows, DBString.Value is already populated by PopulateRowStringsIfNeeded
                 var varRow = varTable.Rows.FirstOrDefault(r => {
-                    var modelCodeStrIdx = ((PDTools.SpecDB.Core.Mapping.Types.DBString)r.ColumnData[0]).StringIndex;
-                    return specDb.LocaleStringDatabase.Strings[modelCodeStrIdx] == name;
+                    var modelCode = (PDTools.SpecDB.Core.Mapping.Types.DBString)r.ColumnData[0];
+                    return modelCode.Value == name;
                 });
 
-                if (varRow != null)
+                if (varRow == null) continue;
+
+
+                int variationId = varRow.ID;
+
+                // Prefer the matching locale's CAR_VARIATION, fall back to american
+                string cvLocale = specDb.Tables.ContainsKey("CAR_VARIATION_" + locale) ? locale : "american";
+                var cvTable = specDb.Tables["CAR_VARIATION_" + cvLocale];
+                if (!cvTable.IsLoaded) cvTable.LoadAllRows(specDb);
+
+                var cvRow = cvTable.Rows.FirstOrDefault(r => ((PDTools.SpecDB.Core.Mapping.Types.DBInt)r.ColumnData[0]).Value == variationId);
+
+                if (cvRow == null)
                 {
-                    int variationId = varRow.ID;
-                    var cvTable = specDb.Tables["CAR_VARIATION_" + specDb.LocaleName];
-                    if (!cvTable.IsLoaded) cvTable.LoadAllRows(specDb);
-                    
-                    var cvRow = cvTable.Rows.FirstOrDefault(r => ((PDTools.SpecDB.Core.Mapping.Types.DBInt)r.ColumnData[0]).Value == variationId);
-                    
-                    if (cvRow != null)
+                    Console.WriteLine($"Could not find CAR_VARIATION matching VariationID: {variationId} (locale: {locale})");
+                    return outName;
+                }
+
+                string genericLabel = cvRow.Label;
+                string carDisplayName = genericLabel;
+
+                // Try to get human-readable name from CAR_NAME using the same locale's SDB
+                string cnLocale = specDb.Tables.ContainsKey("CAR_NAME_" + locale) ? locale : "american";
+                var cnTable = specDb.Tables.ContainsKey("CAR_NAME_" + cnLocale) ? specDb.Tables["CAR_NAME_" + cnLocale] : null;
+                if (cnTable != null)
+                {
+                    if (!cnTable.IsLoaded) cnTable.LoadAllRows(specDb);
+                    var cnStrDb = GetLocaleStrDb(cnLocale);
+                    var cnRow = cnTable.Rows.FirstOrDefault(r => r.Label == genericLabel);
+                    if (cnRow != null)
                     {
-                        string genericLabel = cvRow.Label;
+                        var strIdx = ((PDTools.SpecDB.Core.Mapping.Types.DBString)cnRow.ColumnData[0]).StringIndex;
+                        if (strIdx >= 0 && strIdx < cnStrDb.Strings.Count)
+                            carDisplayName = cnStrDb.Strings[strIdx];
+                    }
+                }
+
+                // Normalize: lowercase, strip special chars, collapse spaces to underscores
+                carDisplayName = carDisplayName.ToLowerInvariant();
+                carDisplayName = carDisplayName.Replace(".", "").Replace("'", "");
+                carDisplayName = System.Text.RegularExpressions.Regex.Replace(carDisplayName, @"[^a-z0-9]", "_");
+                carDisplayName = System.Text.RegularExpressions.Regex.Replace(carDisplayName, @"_+", "_").Trim('_');
+
+                outName = $"{name}_{carDisplayName}";
+                Console.WriteLine($"SpecDB Resolved Name: {outName} (via VARIATION{locale})");
+                return outName;
+            }
+
+            // Fallback: not in any VARIATION table, but may still have a GENERIC_CAR label + CAR_NAME entry
+            Console.WriteLine($"[INFO] {name} has no VARIATION entry. Trying GENERIC_CAR label lookup...");
+            try
+            {
+                if (specDb.Tables.ContainsKey("GENERIC_CAR"))
+                {
+                    var gcTable = specDb.Tables["GENERIC_CAR"];
+                    if (!gcTable.IsLoaded) gcTable.LoadAllRows(specDb);
+
+                    // GENERIC_CAR row Label IS the model code (e.g: "chry0003")
+                    var gcRow = gcTable.Rows.FirstOrDefault(r => r.Label == name);
+                    if (gcRow != null)
+                    {
+                        string genericLabel = gcRow.Label;
                         string carDisplayName = genericLabel;
-                        
-                        var cnTable = specDb.Tables["CAR_NAME_" + specDb.LocaleName];
-                        if (cnTable != null) {
+
+                        // Try CAR_NAME_american for the display name using the generic label
+                        if (specDb.Tables.ContainsKey("CAR_NAME_american"))
+                        {
+                            var cnTable = specDb.Tables["CAR_NAME_american"];
                             if (!cnTable.IsLoaded) cnTable.LoadAllRows(specDb);
                             var cnRow = cnTable.Rows.FirstOrDefault(r => r.Label == genericLabel);
-                            if (cnRow != null) {
+                            if (cnRow != null)
+                            {
                                 var strIdx = ((PDTools.SpecDB.Core.Mapping.Types.DBString)cnRow.ColumnData[0]).StringIndex;
-                                carDisplayName = specDb.LocaleStringDatabase.Strings[strIdx];
+                                int strCount = specDb.LocaleStringDatabase.Strings.Count;
+                                if (strIdx >= 0 && strIdx < strCount)
+                                    carDisplayName = specDb.LocaleStringDatabase.Strings[strIdx];
                             }
                         }
 
-                        // Normalize the name: lowercase, remove special characters, replace spaces/dashes with underscores
                         carDisplayName = carDisplayName.ToLowerInvariant();
                         carDisplayName = carDisplayName.Replace(".", "").Replace("'", "");
                         carDisplayName = System.Text.RegularExpressions.Regex.Replace(carDisplayName, @"[^a-z0-9]", "_");
                         carDisplayName = System.Text.RegularExpressions.Regex.Replace(carDisplayName, @"_+", "_").Trim('_');
-                        
+
                         outName = $"{name}_{carDisplayName}";
-                        Console.WriteLine($"SpecDB Resolved Name: {outName}");
-                    }
-                    else {
-                        Console.WriteLine("Could not find CAR_VARIATION matching VariationID: " + variationId);
+                        Console.WriteLine($"SpecDB Resolved Name: {outName} (via GENERIC_CAR label)");
+                        return outName;
                     }
                 }
-                else {
-                    Console.WriteLine($"Could not find {name} in VARIATIONamerican.");
-                }
-            } catch (Exception e) { Console.WriteLine($"SpecDB Error: {e.Message}"); }
+            }
+            catch (Exception e2) { Console.WriteLine($"SpecDB GENERIC_CAR fallback error: {e2.Message}"); }
+
+            Console.WriteLine($"Could not resolve {name} in any SpecDB table. Using default '_dump' suffix.");
         }
+        catch (Exception e) { Console.WriteLine($"SpecDB Error: {e.Message}"); }
+
         return outName;
     }
+
+
+
 
     public static string ResolveCarTireName(PDTools.SpecDB.Core.SpecDB specDb, string name, bool rear)
     {
