@@ -61,7 +61,8 @@ public class Dumper
                         if (File.Exists(wheelPath)) {
                             string resolvedWheelName = ResolveCarName(specDb, name);
                             Console.WriteLine($"[DEBUG] Found default wheel {name}, extracting to {modelSetOutputDir}\\wheel_{resolvedWheelName}...");
-                            DumpFile(wheelPath, specDb, Path.Combine(modelSetOutputDir, $"wheel_{resolvedWheelName}"));
+                            try { DumpFile(wheelPath, specDb, Path.Combine(modelSetOutputDir, $"wheel_{resolvedWheelName}")); }
+                            catch (Exception ex) { Console.WriteLine($"[WARNING] Wheel extraction failed for {name}: {ex.Message}"); }
                         }
                     }
                     return;
@@ -82,7 +83,8 @@ public class Dumper
                         string wheelPath = Path.Combine(Path.GetDirectoryName(path), "..", "..", "wheel", "menu", name);
                         if (File.Exists(wheelPath)) {
                             string resolvedWheelName = ResolveCarName(specDb, name);
-                            DumpFile(wheelPath, specDb, Path.Combine(modelSetOutputDir, $"wheel_{resolvedWheelName}"));
+                            try { DumpFile(wheelPath, specDb, Path.Combine(modelSetOutputDir, $"wheel_{resolvedWheelName}")); }
+                            catch (Exception ex) { Console.WriteLine($"[WARNING] Wheel extraction failed for {name}: {ex.Message}"); }
                         }
                     }
                     return;
@@ -102,7 +104,8 @@ public class Dumper
                         string wheelPath = Path.Combine(Path.GetDirectoryName(path), "..", "..", "wheel", "menu", name);
                         if (File.Exists(wheelPath)) {
                             string resolvedWheelName = ResolveCarName(specDb, name);
-                            DumpFile(wheelPath, specDb, Path.Combine(modelSetOutputDir, $"wheel_{resolvedWheelName}"));
+                            try { DumpFile(wheelPath, specDb, Path.Combine(modelSetOutputDir, $"wheel_{resolvedWheelName}")); }
+                            catch (Exception ex) { Console.WriteLine($"[WARNING] Wheel extraction failed for {name}: {ex.Message}"); }
                         }
                     }
                     return;
@@ -515,64 +518,173 @@ public class Dumper
 
         if (modelSet is not ModelSet0)
         {
-            int numVars = modelSet.GetNumVariations();
-            var modelSetConfig = new ModelSetConfig
-            {
-                NumVariations = numVars,
-            };
+            // Query VARIATION table directly for all paint colors for this car model code
+            // VARIATION.ModelCode (col 0) == carName, VARIATION.Name (col 3) = paint name
+            // VARIATION.ColorChip0..3 (col 9-12) = packed ARGB runtime GS color multiply values
+            string[] allLocales = ["american", "japanese", "british", "french", "german", "italian", "spanish", "korean", "big5"];
+            List<string> colorNames = new List<string>();
+            List<uint[]> colorChips = new List<uint[]>(); // ColorChip0..3 per variation
 
-            // Go through each variation of the model (variations alter the color of the model)
+            if (specDb != null && carName != null)
+            {
+                foreach (var locale in allLocales)
+                {
+                    string varKey = "VARIATION" + locale;
+                    if (!specDb.Tables.ContainsKey(varKey)) continue;
+
+                    var varTable = specDb.Tables[varKey];
+                    try
+                    {
+                        Console.WriteLine($"[DEBUG VARS] Trying VARIATION{locale} for {carName}...");
+                        if (!varTable.IsLoaded) varTable.LoadAllRows(specDb);
+
+                        // ModelCode (col 0) is already resolved to .Value by PopulateRowStringsIfNeeded
+                        // VARIATION rows for a car are naturally ordered by row ID (their insertion order)
+                        var matchingRows = varTable.Rows
+                            .Where(r => ((PDTools.SpecDB.Core.Mapping.Types.DBString)r.ColumnData[0]).Value == carName)
+                            .ToList();
+
+                        if (matchingRows.Count == 0) continue;
+
+                        Console.WriteLine($"[DEBUG] Found {matchingRows.Count} color(s) for {carName} in VARIATION{locale}");
+
+                        foreach (var varRow in matchingRows)
+                        {
+                            try {
+                                var colorNameObj = (PDTools.SpecDB.Core.Mapping.Types.DBString)varRow.ColumnData[3];
+                                string colorName = (colorNameObj.Value ?? $"Var{colorNames.Count}").Trim();
+                                foreach (char c in Path.GetInvalidFileNameChars()) colorName = colorName.Replace(c, '_');
+                                colorNames.Add(colorName);
+
+                                // Check ColorPatchFileName (col 2) for external paint textures
+                                var patchObj = (PDTools.SpecDB.Core.Mapping.Types.DBString)varRow.ColumnData[2];
+                                string patchName = patchObj.Value ?? "";
+                                if (!string.IsNullOrEmpty(patchName) && patchName != "-")
+                                    Console.WriteLine($"[DEBUG] Color {colorName} uses ColorPatchFileName: {patchName}");
+
+                                // ColorChip0..3 are at columns 9, 10, 11, 12 (for GT4/GT5 ≤ GT5_TRIAL_JP2704)
+                                uint[] chips = new uint[4];
+                                for (int chip = 0; chip < 4; chip++)
+                                {
+                                    int colIdx = 9 + chip;
+                                    if (colIdx < varRow.ColumnData.Count)
+                                        chips[chip] = unchecked((uint)((PDTools.SpecDB.Core.Mapping.Types.DBUInt)varRow.ColumnData[colIdx]).Value);
+                                }
+                                colorChips.Add(chips);
+                            }
+                            catch { colorNames.Add($"Var{colorNames.Count}"); colorChips.Add(new uint[4]); }
+                        }
+
+                        if (colorNames.Count > 0) break;
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"[WARNING] Failed to load VARIATION{locale}: {ex.Message}. Skipping.");
+                    }
+
+                }
+            }
+
+            // If SpecDB gave us no colors fall back to ClutPatchSet.Count from the base texture set.
+            // ClutPatchSet is the actual mechanism used by GT4 for body color variations:
+            // ClutPatchSet[varIndex].TexturesToPatch = which textures get alternate CLUT palettes for this color.
+            int numVars = colorNames.Count;
+            if (numVars == 0)
+            {
+                var baseTexSets = modelSet.GetTextureSetList(); // TextureSetLists[0]
+                int clutCount = baseTexSets.Count > 0 ? baseTexSets[0].ClutPatchSet.Count : 0;
+                numVars = clutCount > 0 ? clutCount : Math.Max(1, modelSet.GetNumVariations());
+            }
+            if (colorNames.Count == 0)
+                for (int i = 0; i < numVars; i++) colorNames.Add(numVars == 1 ? "" : $"Var{i}");
+
+            Console.WriteLine($"[DEBUG] {numVars} color variation(s) to dump for {carName ?? "unknown"}");
+            var modelSetConfig = new ModelSetConfig { NumVariations = numVars };
+
+            // Dump OBJ geometry once at the car root (same mesh for all colors)
+            Directory.CreateDirectory(dir);
+            int numModels = modelSet.GetNumModels();
+            for (int modelIndex = 0; modelIndex < numModels; modelIndex++)
+                DumpModelSetModel(modelSet, dir, modelSetConfig, 0, dir, modelIndex);
+
+            // Always use TextureSetLists[0] — it is the shared texture set that contains all
+            // ClutPatchSet entries for color switching.  TextureSetLists beyond index 0 are LOD levels.
+            List<TextureSet1> baseTexSetList = modelSet.GetTextureSetList(); // = TextureSetLists[0]
+            string baseTextureDir = Path.Combine(dir, "Textures");
+            Directory.CreateDirectory(baseTextureDir);
+
+            // Debug: show how many ClutPatch entries exist in the base texture set
+            for (int li = 0; li < baseTexSetList.Count; li++)
+                Console.WriteLine($"[DEBUG] TextureSet LOD{li}: {baseTexSetList[li].pgluTextures.Count} textures, {baseTexSetList[li].ClutPatchSet.Count} ClutPatches");
+
+            // Write colors.json with runtime GS multiply values converted from ABGR to standard Hex ARGB
+            var allColors = new List<object>();
             for (int varIndex = 0; varIndex < numVars; varIndex++)
             {
-                string varName = $"Var{varIndex}";
-                if (specDb != null && carName != null)
+                string varName = colorNames[varIndex];
+                if (varIndex < colorChips.Count)
                 {
-                    try {
-                        var variationTable = specDb.Tables["CAR_VARIATION_" + specDb.LocaleName];
-                        if (!variationTable.IsLoaded) variationTable.LoadAllRows(specDb);
-                        var cvRows = variationTable.Rows.Where(r => r.Label == carName).ToList();
-                        if (varIndex < cvRows.Count)
-                        {
-                            int varId = (int)((PDTools.SpecDB.Core.Mapping.Types.DBInt)cvRows[varIndex].ColumnData[0]).Value;
-                            var varTable = specDb.Tables["VARIATION" + specDb.LocaleName];
-                            if (!varTable.IsLoaded) varTable.LoadAllRows(specDb);
-                            var varRow = varTable.Rows.FirstOrDefault(r => r.ID == varId);
-                            if (varRow != null)
-                            {
-                                var colorNameObj = (PDTools.SpecDB.Core.Mapping.Types.DBString)varRow.ColumnData[3];
-                                string colorName = specDb.LocaleStringDatabase.Strings[colorNameObj.StringIndex];
-                                foreach (char c in Path.GetInvalidFileNameChars()) colorName = colorName.Replace(c, '_');
-                                varName = colorName;
-                                Console.WriteLine($"SpecDB Resolved Variation Color: {varName}");
-                            }
-                        }
-                    } catch { }
+                    uint[] chips = colorChips[varIndex];
+                    // GT4 GS stores ColorChips as ABGR, with 128 (0x80) equating to a 1.0 multiplier.
+                    // Blender users need the floating-point multiplier to multiply against base textures accurately.
+                    // Blender parses 8-char hex as RRGGBBAA and assumes 0-255 is 0.0-1.0. 
+                    // We output a standard 6-char RRGGBB scaled for visual preview, and the raw floats for accurate shader nodes.
+                    object FormatChip(uint abgr) {
+                        uint r = abgr & 0xFF;
+                        uint g = (abgr >> 8) & 0xFF;
+                        uint b = (abgr >> 16) & 0xFF;
+                        int scaledR = Math.Min(255, (int)(r * 255 / 128));
+                        int scaledG = Math.Min(255, (int)(g * 255 / 128));
+                        int scaledB = Math.Min(255, (int)(b * 255 / 128));
+                        return new {
+                            HexPreview = $"#{scaledR:X2}{scaledG:X2}{scaledB:X2}",
+                            BlendMultiplierR = r / 128.0f,
+                            BlendMultiplierG = g / 128.0f,
+                            BlendMultiplierB = b / 128.0f
+                        };
+                    }
+                    allColors.Add(new {
+                        VariationIndex = varIndex,
+                        ColorName = varName == "" ? $"(Default{varIndex})" : varName,
+                        ColorChip0 = FormatChip(chips[0]),
+                        ColorChip1 = FormatChip(chips[1]),
+                        ColorChip2 = FormatChip(chips[2]),
+                        ColorChip3 = FormatChip(chips[3])
+                    });
                 }
+            }
+            if (allColors.Count > 0)
+            {
+                string json = System.Text.Json.JsonSerializer.Serialize(allColors, new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
+                File.WriteAllText(Path.Combine(baseTextureDir, "colors.json"), json);
+            }
 
-                string varDir = numVars == 1 ? dir : Path.Combine(dir, varName);
-                string textureOutputDir = Path.Combine(varDir, $"Textures");
-                Directory.CreateDirectory(textureOutputDir);
-
-                Console.WriteLine($"Dumping variation #{varIndex}");
-
-                var texSetList = modelSet.GetTextureSetList();
-                for (int lodIndex = 0; lodIndex < texSetList.Count; lodIndex++)
+            Console.WriteLine($"Dumping base textures (applied palettes based on Variation 0)...");
+            try
+            {
+                for (int lodIndex = 0; lodIndex < baseTexSetList.Count; lodIndex++)
                 {
                     Console.WriteLine($"Dumping textures for lod {lodIndex}");
-
-                    TextureSet1 lodTexSet = texSetList[lodIndex];
+                    TextureSet1 lodTexSet = baseTexSetList[lodIndex];
                     for (int textureIndex = 0; textureIndex < lodTexSet.pgluTextures.Count; textureIndex++)
                     {
                         Console.WriteLine($"Dumping texture index {textureIndex}");
-                        using var image = lodTexSet.GetTextureImage(textureIndex, varIndex);
-                        image.Save(Path.Combine(textureOutputDir, $"{lodIndex}.{textureIndex}.png"));
+                        try {
+                            // Automatically grab ClutPatch 0 (default palette) to dump the base textures once
+                            using var image = lodTexSet.GetTextureImage(textureIndex, 0);
+                            image.Save(Path.Combine(baseTextureDir, $"{lodIndex}.{textureIndex}.png"));
+                        }
+                        catch (Exception ex) {
+                            Console.WriteLine($"[WARNING] Failed to dump texture LOD{lodIndex}.{textureIndex}: {ex.Message}");
+                        }
                     }
                 }
-
-                int numModels = modelSet.GetNumModels();
-                for (int modelIndex = 0; modelIndex < numModels; modelIndex++)
-                    DumpModelSetModel(modelSet, dir, modelSetConfig, varIndex, varDir, modelIndex);
             }
+            catch (Exception e)
+            {
+                Console.WriteLine("Failed to dump model set: " + e.Message);
+            }
+
 
             Console.WriteLine("Dumping model set textures");
             DumpModelSetTextures(modelSet, modelSetConfig);
