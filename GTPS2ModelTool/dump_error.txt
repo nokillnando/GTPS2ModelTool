@@ -1,0 +1,19 @@
+Info|----------------------------------------- 
+Info|- GTPS2ModelTool 1.1.0 by Nenkai 
+Info|----------------------------------------- 
+Info|- https://github.com/Nenkai 
+Info|- https://nenkai.github.io/gt-modding-hub/ 
+Info|----------------------------------------- 
+Info| 
+SpecDB Loaded for metadata mapping.
+System.IO.FileNotFoundException: Could not find file 'C:\Gt4\tools\gt4fs\extracted\car\menu\fiat0002.mdls'.
+File name: 'C:\Gt4\tools\gt4fs\extracted\car\menu\fiat0002.mdls'
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.CreateFile(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+   at System.IO.Strategies.OSFileStreamStrategy..ctor(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+   at System.IO.Strategies.FileStreamHelpers.ChooseStrategyCore(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+   at System.IO.FileStream..ctor(String path, FileMode mode)
+   at GTPS2ModelTool.Dumper.DumpFile(String path, SpecDB specDb, String outDirOverride) in C:\Gt4\GTPS2ModelTool\GTPS2ModelTool\Dumper.cs:line 27
+   at GTPS2ModelTool.Program.Dump(DumpVerbs dumpVerbs) in C:\Gt4\GTPS2ModelTool\GTPS2ModelTool\Program.cs:line 588
+   at CommandLine.ParserResultExtensions.WithParsed[T](ParserResult`1 result, Action`1 action)
+   at GTPS2ModelTool.Program.Main(String[] args) in C:\Gt4\GTPS2ModelTool\GTPS2ModelTool\Program.cs:line 41

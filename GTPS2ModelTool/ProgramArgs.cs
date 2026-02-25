@@ -92,4 +92,7 @@ public class DumpVerbs
 {
     [Option('i', "input", Required = true, HelpText = "Input file.")]
     public string InputFile { get; set; }
+
+    [Option('s', "specdb", HelpText = "Path to extracted SpecDB directory (e.g. GT4_US2560) to lookup real car names and variations.")]
+    public string SpecDBPath { get; set; }
 }

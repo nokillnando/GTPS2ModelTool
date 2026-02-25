@@ -1,0 +1,93 @@
+Searching for strings: pdi_0000, mich0001, bs__0001, fiat0002
+[CELL MATCH] Table: CAR_NAME_japanese, Row ID: 733, Col 2 (ShortName) = fiat0002
+[CELL MATCH] Table: VARIATIONamerican, Row ID: 135, Col 0 (ModelCode) = fiat0002
+[CELL MATCH] Table: VARIATIONamerican, Row ID: 135, Col 2 (ColorPatchFileName) = fiat0002
+[CELL MATCH] Table: VARIATIONamerican, Row ID: 135, Col 0 (ModelCode) = fiat0002
+[CELL MATCH] Table: VARIATIONamerican, Row ID: 135, Col 2 (ColorPatchFileName) = fiat0002
+[CELL MATCH] Table: VARIATIONamerican, Row ID: 135, Col 0 (ModelCode) = fiat0002
+[CELL MATCH] Table: VARIATIONamerican, Row ID: 135, Col 2 (ColorPatchFileName) = fiat0002
+[CELL MATCH] Table: VARIATIONamerican, Row ID: 135, Col 0 (ModelCode) = fiat0002
+[CELL MATCH] Table: VARIATIONamerican, Row ID: 135, Col 2 (ColorPatchFileName) = fiat0002
+[CELL MATCH] Table: VARIATIONamerican, Row ID: 135, Col 0 (ModelCode) = fiat0002
+[CELL MATCH] Table: VARIATIONamerican, Row ID: 135, Col 2 (ColorPatchFileName) = fiat0002
+[CELL MATCH] Table: VARIATIONamerican, Row ID: 135, Col 0 (ModelCode) = fiat0002
+[CELL MATCH] Table: VARIATIONamerican, Row ID: 135, Col 2 (ColorPatchFileName) = fiat0002
+[CELL MATCH] Table: VARIATIONbig5, Row ID: 33, Col 3 (Name) = fiat0002
+[CELL MATCH] Table: VARIATIONbritish, Row ID: 135, Col 0 (ModelCode) = fiat0002
+[CELL MATCH] Table: VARIATIONbritish, Row ID: 135, Col 2 (ColorPatchFileName) = fiat0002
+[CELL MATCH] Table: VARIATIONbritish, Row ID: 135, Col 0 (ModelCode) = fiat0002
+[CELL MATCH] Table: VARIATIONbritish, Row ID: 135, Col 2 (ColorPatchFileName) = fiat0002
+[CELL MATCH] Table: VARIATIONbritish, Row ID: 135, Col 0 (ModelCode) = fiat0002
+[CELL MATCH] Table: VARIATIONbritish, Row ID: 135, Col 2 (ColorPatchFileName) = fiat0002
+[CELL MATCH] Table: VARIATIONbritish, Row ID: 135, Col 0 (ModelCode) = fiat0002
+[CELL MATCH] Table: VARIATIONbritish, Row ID: 135, Col 2 (ColorPatchFileName) = fiat0002
+[CELL MATCH] Table: VARIATIONbritish, Row ID: 135, Col 0 (ModelCode) = fiat0002
+[CELL MATCH] Table: VARIATIONbritish, Row ID: 135, Col 2 (ColorPatchFileName) = fiat0002
+[CELL MATCH] Table: VARIATIONbritish, Row ID: 135, Col 0 (ModelCode) = fiat0002
+[CELL MATCH] Table: VARIATIONbritish, Row ID: 135, Col 2 (ColorPatchFileName) = fiat0002
+[CELL MATCH] Table: VARIATIONfrench, Row ID: 135, Col 0 (ModelCode) = fiat0002
+[CELL MATCH] Table: VARIATIONfrench, Row ID: 135, Col 2 (ColorPatchFileName) = fiat0002
+[CELL MATCH] Table: VARIATIONfrench, Row ID: 135, Col 0 (ModelCode) = fiat0002
+[CELL MATCH] Table: VARIATIONfrench, Row ID: 135, Col 2 (ColorPatchFileName) = fiat0002
+[CELL MATCH] Table: VARIATIONfrench, Row ID: 135, Col 0 (ModelCode) = fiat0002
+[CELL MATCH] Table: VARIATIONfrench, Row ID: 135, Col 2 (ColorPatchFileName) = fiat0002
+[CELL MATCH] Table: VARIATIONfrench, Row ID: 135, Col 0 (ModelCode) = fiat0002
+[CELL MATCH] Table: VARIATIONfrench, Row ID: 135, Col 2 (ColorPatchFileName) = fiat0002
+[CELL MATCH] Table: VARIATIONfrench, Row ID: 135, Col 0 (ModelCode) = fiat0002
+[CELL MATCH] Table: VARIATIONfrench, Row ID: 135, Col 2 (ColorPatchFileName) = fiat0002
+[CELL MATCH] Table: VARIATIONfrench, Row ID: 135, Col 0 (ModelCode) = fiat0002
+[CELL MATCH] Table: VARIATIONfrench, Row ID: 135, Col 2 (ColorPatchFileName) = fiat0002
+[CELL MATCH] Table: VARIATIONgerman, Row ID: 135, Col 0 (ModelCode) = fiat0002
+[CELL MATCH] Table: VARIATIONgerman, Row ID: 135, Col 2 (ColorPatchFileName) = fiat0002
+[CELL MATCH] Table: VARIATIONgerman, Row ID: 135, Col 0 (ModelCode) = fiat0002
+[CELL MATCH] Table: VARIATIONgerman, Row ID: 135, Col 2 (ColorPatchFileName) = fiat0002
+[CELL MATCH] Table: VARIATIONgerman, Row ID: 135, Col 0 (ModelCode) = fiat0002
+[CELL MATCH] Table: VARIATIONgerman, Row ID: 135, Col 2 (ColorPatchFileName) = fiat0002
+[CELL MATCH] Table: VARIATIONgerman, Row ID: 135, Col 0 (ModelCode) = fiat0002
+[CELL MATCH] Table: VARIATIONgerman, Row ID: 135, Col 2 (ColorPatchFileName) = fiat0002
+[CELL MATCH] Table: VARIATIONgerman, Row ID: 135, Col 0 (ModelCode) = fiat0002
+[CELL MATCH] Table: VARIATIONgerman, Row ID: 135, Col 2 (ColorPatchFileName) = fiat0002
+[CELL MATCH] Table: VARIATIONgerman, Row ID: 135, Col 0 (ModelCode) = fiat0002
+[CELL MATCH] Table: VARIATIONgerman, Row ID: 135, Col 2 (ColorPatchFileName) = fiat0002
+[CELL MATCH] Table: VARIATIONitalian, Row ID: 135, Col 0 (ModelCode) = fiat0002
+[CELL MATCH] Table: VARIATIONitalian, Row ID: 135, Col 2 (ColorPatchFileName) = fiat0002
+[CELL MATCH] Table: VARIATIONitalian, Row ID: 135, Col 0 (ModelCode) = fiat0002
+[CELL MATCH] Table: VARIATIONitalian, Row ID: 135, Col 2 (ColorPatchFileName) = fiat0002
+[CELL MATCH] Table: VARIATIONitalian, Row ID: 135, Col 0 (ModelCode) = fiat0002
+[CELL MATCH] Table: VARIATIONitalian, Row ID: 135, Col 2 (ColorPatchFileName) = fiat0002
+[CELL MATCH] Table: VARIATIONitalian, Row ID: 135, Col 0 (ModelCode) = fiat0002
+[CELL MATCH] Table: VARIATIONitalian, Row ID: 135, Col 2 (ColorPatchFileName) = fiat0002
+[CELL MATCH] Table: VARIATIONitalian, Row ID: 135, Col 0 (ModelCode) = fiat0002
+[CELL MATCH] Table: VARIATIONitalian, Row ID: 135, Col 2 (ColorPatchFileName) = fiat0002
+[CELL MATCH] Table: VARIATIONitalian, Row ID: 135, Col 0 (ModelCode) = fiat0002
+[CELL MATCH] Table: VARIATIONitalian, Row ID: 135, Col 2 (ColorPatchFileName) = fiat0002
+[CELL MATCH] Table: VARIATIONkorean, Row ID: 33, Col 3 (Name) = fiat0002
+[CELL MATCH] Table: VARIATIONspanish, Row ID: 135, Col 0 (ModelCode) = fiat0002
+[CELL MATCH] Table: VARIATIONspanish, Row ID: 135, Col 2 (ColorPatchFileName) = fiat0002
+[CELL MATCH] Table: VARIATIONspanish, Row ID: 135, Col 0 (ModelCode) = fiat0002
+[CELL MATCH] Table: VARIATIONspanish, Row ID: 135, Col 2 (ColorPatchFileName) = fiat0002
+[CELL MATCH] Table: VARIATIONspanish, Row ID: 135, Col 0 (ModelCode) = fiat0002
+[CELL MATCH] Table: VARIATIONspanish, Row ID: 135, Col 2 (ColorPatchFileName) = fiat0002
+[CELL MATCH] Table: VARIATIONspanish, Row ID: 135, Col 0 (ModelCode) = fiat0002
+[CELL MATCH] Table: VARIATIONspanish, Row ID: 135, Col 2 (ColorPatchFileName) = fiat0002
+[CELL MATCH] Table: VARIATIONspanish, Row ID: 135, Col 0 (ModelCode) = fiat0002
+[CELL MATCH] Table: VARIATIONspanish, Row ID: 135, Col 2 (ColorPatchFileName) = fiat0002
+[CELL MATCH] Table: VARIATIONspanish, Row ID: 135, Col 0 (ModelCode) = fiat0002
+[CELL MATCH] Table: VARIATIONspanish, Row ID: 135, Col 2 (ColorPatchFileName) = fiat0002
+[LABEL MATCH] Table: WHEEL, Row ID: 234, Label: pdi_001w
+[LABEL MATCH] Table: WHEEL, Row ID: 235, Label: pdi_002w
+[LABEL MATCH] Table: WHEEL, Row ID: 236, Label: pdi_003w
+[LABEL MATCH] Table: WHEEL, Row ID: 237, Label: pdi_004w
+[LABEL MATCH] Table: WHEEL, Row ID: 239, Label: pdi_006w
+[LABEL MATCH] Table: WHEEL, Row ID: 240, Label: pdi_007w
+[LABEL MATCH] Table: WHEEL, Row ID: 241, Label: pdi_008w
+[LABEL MATCH] Table: WHEEL, Row ID: 242, Label: pdi_009w
+[LABEL MATCH] Table: WHEEL, Row ID: 243, Label: pdi_010w
+[LABEL MATCH] Table: WHEEL, Row ID: 244, Label: pdi_011w
+[LABEL MATCH] Table: WHEEL, Row ID: 245, Label: pdi_012w
+[LABEL MATCH] Table: WHEEL, Row ID: 246, Label: pdi_013w
+[LABEL MATCH] Table: WHEEL, Row ID: 247, Label: pdi_014w
+[LABEL MATCH] Table: WHEEL, Row ID: 248, Label: pdi_015w
+[LABEL MATCH] Table: WHEEL, Row ID: 249, Label: pdi_016w
+[LABEL MATCH] Table: WHEEL, Row ID: 250, Label: pdi_017w
+[LABEL MATCH] Table: WHEEL, Row ID: 251, Label: pdi_018w

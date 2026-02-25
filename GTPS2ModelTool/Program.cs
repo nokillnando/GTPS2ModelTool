@@ -31,6 +31,107 @@ internal class Program
         Logger.Info("-----------------------------------------");
         Logger.Info("");
 
+        if (args.Length > 0 && args[0] == "dbtest")
+        {
+            var db = PDTools.SpecDB.Core.SpecDB.LoadFromSpecDBFolder(@"C:\Gt4\tools\gt4fs\extracted\specdb\GT4_US2560", PDTools.SpecDB.Core.SpecDBFolder.GT4_US2560, false);
+            db.LocaleName = "american";
+            db.ReadStringDatabases();
+            
+            Action<string, string> dumpCsv = (tableName, fileName) => {
+                var t = db.Tables[tableName];
+                t.LoadAllRows(db);
+                var sb = new System.Text.StringBuilder();
+                for (int i=0; i<t.Rows.Count; i++) {
+                    var r = t.Rows[i];
+                    var vals = new System.Collections.Generic.List<string>();
+                    vals.Add(r.Label);
+                    foreach(var col in r.ColumnData) {
+                        if (col is PDTools.SpecDB.Core.Mapping.Types.DBString dbStr) {
+                            vals.Add(db.LocaleStringDatabase.Strings[dbStr.StringIndex]);
+                        } else {
+                            vals.Add(col.ToString());
+                        }
+                    }
+                    sb.AppendLine(string.Join(",", vals));
+                }
+                File.WriteAllText(fileName, sb.ToString());
+            };
+
+            dumpCsv("WHEEL", "db_wheels_detailed.csv");
+            dumpCsv("FRONTTIRE", "db_front_tires_detailed.csv");
+            dumpCsv("REARTIRE", "db_rear_tires_detailed.csv");
+            dumpCsv("TIRECOMPOUND", "db_tire_compound.csv");
+            dumpCsv("TIRESIZE", "db_tire_size.csv");
+            dumpCsv("DEFAULT_PARTS", "db_default_parts.csv");
+            dumpCsv("GENERIC_CAR", "db_generic_car.csv");
+
+            // Look up test for bltz0001
+            Console.WriteLine("Tracing bltz0001...");
+            var varTable = db.Tables["VARIATIONamerican"];
+            if (!varTable.IsLoaded) varTable.LoadAllRows(db);
+            var varRow = varTable.Rows.FirstOrDefault(r => {
+                var strIdx = ((PDTools.SpecDB.Core.Mapping.Types.DBString)r.ColumnData[0]).StringIndex;
+                return db.LocaleStringDatabase.Strings[strIdx] == "bltz0001";
+            });
+            if (varRow != null) {
+                var cvTable = db.Tables["CAR_VARIATION_american"];
+                if (!cvTable.IsLoaded) cvTable.LoadAllRows(db);
+                var cvRow = cvTable.Rows.FirstOrDefault(r => ((PDTools.SpecDB.Core.Mapping.Types.DBInt)r.ColumnData[0]).Value == varRow.ID);
+                if (cvRow != null) {
+                    string genericLabel = cvRow.Label;
+                    Console.WriteLine($"Generic Label: {genericLabel}");
+                    
+                    // Look up GENERIC_CAR for this Generic Label
+                    var gcTable = db.Tables["GENERIC_CAR"];
+                    if (!gcTable.IsLoaded) gcTable.LoadAllRows(db);
+                    var gcRow = gcTable.Rows.FirstOrDefault(r => r.Label.Equals(genericLabel, StringComparison.OrdinalIgnoreCase));
+                    if (gcRow != null) {
+                        Console.WriteLine($"GENERIC CAR FOUND: {gcRow.Label}");
+                        var dfTable = db.Tables["DEFAULT_PARTS"];
+                        if (!dfTable.IsLoaded) dfTable.LoadAllRows(db);
+                        string dfLabel = "df_pt_" + genericLabel;
+                        var dfRow = dfTable.Rows.FirstOrDefault(r => r.Label.Equals(dfLabel, StringComparison.OrdinalIgnoreCase));
+                        if (dfRow != null) {
+                            Console.WriteLine($"Found Default Parts: {dfLabel}");
+                            // Wheel is usually Category 24, FRONTTIRE is 25, REARTIRE is 26
+                            // Let's find columns where value is paired with 24, 25, 26
+                            int wheelId = -1, frontTireId = -1, rearTireId = -1;
+                            for(int i = 1; i < dfRow.ColumnData.Count; i+=2) {
+                                if (int.TryParse(dfRow.ColumnData[i].ToString(), out int typeId) &&
+                                    int.TryParse(dfRow.ColumnData[i-1].ToString(), out int partId)) {
+                                    if (typeId == 24) wheelId = partId;
+                                    if (typeId == 25) frontTireId = partId;
+                                    if (typeId == 26) rearTireId = partId;
+                                }
+                            }
+                            
+                            Console.WriteLine($"Wheel ID: {wheelId}, FrontTire ID: {frontTireId}, RearTire ID: {rearTireId}");
+                            
+                            if (wheelId != -1) {
+                                var wt = db.Tables["WHEEL"];
+                                if (!wt.IsLoaded) wt.LoadAllRows(db);
+                                var wRow = wt.Rows.FirstOrDefault(r => r.ID == wheelId);
+                                if (wRow != null) Console.WriteLine($"Resolved WHEEL: {wRow.Label}");
+                            }
+                            if (frontTireId != -1) {
+                                var ft = db.Tables["FRONTTIRE"];
+                                if (!ft.IsLoaded) ft.LoadAllRows(db);
+                                var ftRow = ft.Rows.FirstOrDefault(r => r.ID == frontTireId);
+                                if (ftRow != null) Console.WriteLine($"Resolved FRONTTIRE: {ftRow.Label}");
+                            }
+                            if (rearTireId != -1) {
+                                var rt = db.Tables["REARTIRE"];
+                                if (!rt.IsLoaded) rt.LoadAllRows(db);
+                                var rtRow = rt.Rows.FirstOrDefault(r => r.ID == rearTireId);
+                                if (rtRow != null) Console.WriteLine($"Resolved REARTIRE: {rtRow.Label}");
+                            }
+                        }
+                    }
+                }
+            }
+            return;
+        }
+
         if (args.Length == 1)
         {
             Dump(new DumpVerbs() { InputFile = args[0] });
@@ -548,6 +649,22 @@ internal class Program
 
     static void Dump(DumpVerbs dumpVerbs)
     {
+        PDTools.SpecDB.Core.SpecDB specDb = null;
+        if (!string.IsNullOrEmpty(dumpVerbs.SpecDBPath))
+        {
+            try
+            {
+                specDb = PDTools.SpecDB.Core.SpecDB.LoadFromSpecDBFolder(dumpVerbs.SpecDBPath, PDTools.SpecDB.Core.SpecDBFolder.GT4_US2560, false);
+                specDb.LocaleName = "american";
+                specDb.ReadStringDatabases();
+                Console.WriteLine("SpecDB Loaded for metadata mapping.");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Warning: Failed to load SpecDB from {dumpVerbs.SpecDBPath}: {e.Message}");
+            }
+        }
+
         if (Directory.Exists(dumpVerbs.InputFile))
         {
             foreach (var file in Directory.GetFiles(dumpVerbs.InputFile, "*", SearchOption.AllDirectories))
@@ -555,7 +672,7 @@ internal class Program
                 try
                 {
                     Console.WriteLine($"Processing: {file}");
-                    Dumper.DumpFile(file);
+                    Dumper.DumpFile(file, specDb);
                 }
                 catch (Exception e)
                 {
@@ -565,7 +682,7 @@ internal class Program
         }
         else
         {
-            Dumper.DumpFile(dumpVerbs.InputFile);
+            Dumper.DumpFile(dumpVerbs.InputFile, specDb);
         }
     }
 }

@@ -22,6 +22,7 @@
     <ProjectReference Include="..\PDTools\PDTools.Files\PDTools.Files.csproj" />
     <ProjectReference Include="..\PDTools\PDTools.Utils\PDTools.Utils.csproj" />
     <ProjectReference Include="..\SharpTriStrip\SharpTriStrip.csproj" />
+    <ProjectReference Include="..\PDTools\PDTools.SpecDB\PDTools.SpecDB.csproj" />
   </ItemGroup>
 
   <ItemGroup>

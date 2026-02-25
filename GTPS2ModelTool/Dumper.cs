@@ -22,9 +22,9 @@ namespace GTPS2ModelTool;
 
 public class Dumper
 {
-    public static void DumpFile(string path)
+    public static void DumpFile(string path, PDTools.SpecDB.Core.SpecDB specDb = null, string outDirOverride = null)
     {
-        using var fs = new FileStream(path, FileMode.Open);
+        using var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
         using var bs = new BinaryReader(fs);
 
         if (fs.Length < 0x04)
@@ -35,6 +35,9 @@ public class Dumper
 
         // Try Heuristics for finding what type of file we're dealing with
         uint magic = bs.ReadUInt32();
+        
+        Console.WriteLine($"[DEBUG ROOT] File magic: {magic:X8} | specDb is null? {(specDb == null)}");
+
         switch (magic) // CAR4
         {
             case 0x34524143:
@@ -46,9 +49,33 @@ public class Dumper
                     var modelSet = new ModelSet2();
                     modelSet.FromStream(fs);
                     string name = Path.GetFileNameWithoutExtension(path);
-                    string modelSetOutputDir = Path.Combine(Path.GetDirectoryName(path), $"{name}_dump");
+                    string outName = ResolveCarName(specDb, name);
+                    string modelSetOutputDir = outDirOverride ?? Path.Combine(Path.GetDirectoryName(path), outName);
 
-                    DumpModelSet(modelSet, modelSetOutputDir);
+                    Console.WriteLine($"[DEBUG] Dumping CAR4 {name} to {modelSetOutputDir}");
+
+                    DumpModelSet(modelSet, modelSetOutputDir, specDb, name);
+                    
+                    if (outDirOverride == null) {
+                        string wheelPath = Path.Combine(Path.GetDirectoryName(path), "..", "..", "wheel", "menu", name);
+                        if (File.Exists(wheelPath)) {
+                            string resolvedWheelName = ResolveCarName(specDb, name);
+                            Console.WriteLine($"[DEBUG] Found default wheel {name}, extracting to {modelSetOutputDir}\\wheel_{resolvedWheelName}...");
+                            DumpFile(wheelPath, specDb, Path.Combine(modelSetOutputDir, $"wheel_{resolvedWheelName}"));
+                        }
+                        
+                        string tirePath = Path.Combine(Path.GetDirectoryName(path), "..", "..", "tire", "menu", name);
+                        if (!File.Exists(tirePath)) {
+                            tirePath = Path.Combine(Path.GetDirectoryName(path), "..", "..", "tire", "menu", "pdi_0000");
+                        }
+                        if (File.Exists(tirePath)) {
+                            string tireName = Path.GetFileNameWithoutExtension(tirePath);
+                            string resolvedTireName = ResolveCarTireName(specDb, name, false);
+                            if (string.IsNullOrEmpty(resolvedTireName)) resolvedTireName = ResolveCarName(specDb, tireName);
+                            Console.WriteLine($"[DEBUG] Found tire model {tireName}, extracting to {modelSetOutputDir}\\tire_{resolvedTireName}...");
+                            DumpFile(tirePath, specDb, Path.Combine(modelSetOutputDir, $"tire_{resolvedTireName}"));
+                        }
+                    }
                     return;
                 }
 
@@ -60,8 +87,16 @@ public class Dumper
                     modelSet.FromStream(fs);
 
                     string name = Path.GetFileNameWithoutExtension(path);
-                    string modelSetOutputDir = Path.Combine(Path.GetDirectoryName(path), $"{name}_dump");
-                    DumpModelSet(modelSet, modelSetOutputDir);
+                    string outName = ResolveCarName(specDb, name);
+                    string modelSetOutputDir = outDirOverride ?? Path.Combine(Path.GetDirectoryName(path), outName);
+                    DumpModelSet(modelSet, modelSetOutputDir, specDb, name);
+                    if (outDirOverride == null) {
+                        string wheelPath = Path.Combine(Path.GetDirectoryName(path), "..", "..", "wheel", "menu", name);
+                        if (File.Exists(wheelPath)) {
+                            string resolvedWheelName = ResolveCarName(specDb, name);
+                            DumpFile(wheelPath, specDb, Path.Combine(modelSetOutputDir, $"wheel_{resolvedWheelName}"));
+                        }
+                    }
                     return;
                 }
 
@@ -72,8 +107,24 @@ public class Dumper
                     modelSet.FromStream(fs);
 
                     string name = Path.GetFileNameWithoutExtension(path);
-                    string modelSetOutputDir = Path.Combine(Path.GetDirectoryName(path), $"{name}_dump");
-                    DumpModelSet(modelSet, modelSetOutputDir);
+                    string outName = ResolveCarName(specDb, name);
+                    string modelSetOutputDir = outDirOverride ?? Path.Combine(Path.GetDirectoryName(path), outName);
+                    DumpModelSet(modelSet, modelSetOutputDir, specDb, name);
+                    if (outDirOverride == null) {
+                        string wheelPath = Path.Combine(Path.GetDirectoryName(path), "..", "..", "wheel", "menu", name);
+                        if (File.Exists(wheelPath)) {
+                            string resolvedWheelName = ResolveCarName(specDb, name);
+                            DumpFile(wheelPath, specDb, Path.Combine(modelSetOutputDir, $"wheel_{resolvedWheelName}"));
+                        }
+                        
+                        string tirePath = Path.Combine(Path.GetDirectoryName(path), "..", "..", "tire", "menu", name);
+                        if (!File.Exists(tirePath)) tirePath = Path.Combine(Path.GetDirectoryName(path), "..", "..", "tire", "menu", "pdi_0000");
+                        if (File.Exists(tirePath)) {
+                            string tireName = Path.GetFileNameWithoutExtension(tirePath);
+                            string resolvedTireName = ResolveCarName(specDb, tireName);
+                            DumpFile(tirePath, specDb, Path.Combine(modelSetOutputDir, $"tire_{resolvedTireName}"));
+                        }
+                    }
                     return;
                 }
             case ModelSet0.MAGIC:
@@ -83,8 +134,16 @@ public class Dumper
                     modelSet.FromStream(fs);
 
                     string name = Path.GetFileNameWithoutExtension(path);
-                    string modelSetOutputDir = Path.Combine(Path.GetDirectoryName(path), $"{name}_dump");
+                    string outName = ResolveCarName(specDb, name);
+                    string modelSetOutputDir = outDirOverride ?? Path.Combine(Path.GetDirectoryName(path), outName);
                     DumpModelSet0(modelSet, modelSetOutputDir);
+                    if (outDirOverride == null) {
+                        string wheelPath = Path.Combine(Path.GetDirectoryName(path), "..", "..", "wheel", "menu", name);
+                        if (File.Exists(wheelPath)) {
+                            string resolvedWheelName = ResolveCarName(specDb, name);
+                            DumpFile(wheelPath, specDb, Path.Combine(modelSetOutputDir, $"wheel_{resolvedWheelName}"));
+                        }
+                    }
                     return;
                 }
 
@@ -107,8 +166,8 @@ public class Dumper
                     modelSet.FromStream(fs);
 
                     string name = Path.GetFileNameWithoutExtension(path);
-                    string modelSetOutputDir = Path.Combine(Path.GetDirectoryName(path), $"{name}_dump");
-                    DumpModelSet(modelSet, modelSetOutputDir);
+                    string modelSetOutputDir = outDirOverride ?? Path.Combine(Path.GetDirectoryName(path), $"{name}_dump");
+                    DumpModelSet(modelSet, modelSetOutputDir, specDb, name);
                     return;
                 }
 
@@ -126,7 +185,7 @@ public class Dumper
                     }
 
                     string name = Path.GetFileNameWithoutExtension(path);
-                    string texSetOutputDir = Path.Combine(Path.GetDirectoryName(path), $"{name}_textures");
+                    string texSetOutputDir = outDirOverride ?? Path.Combine(Path.GetDirectoryName(path), $"{name}_textures");
                     DumpTextureSet(texSet, texSetOutputDir);
                     return;
                 }
@@ -204,7 +263,9 @@ public class Dumper
                 fs.Position = 0x00;
 
                 string name = Path.GetFileNameWithoutExtension(path);
-                string courseDataOutputDir = Path.Combine(Path.GetDirectoryName(path), $"{name}_dump");
+                string outName = ResolveCarName(specDb, name);
+
+                string courseDataOutputDir = Path.Combine(Path.GetDirectoryName(path), outName);
 
                 var courseDataFile = new CourseDataFileGT4();
                 courseDataFile.FromStream(fs);
@@ -257,7 +318,8 @@ public class Dumper
                 fs.Position = 0x20;
                 var modelSet = new ModelSet1();
                 modelSet.FromStream(fs);
-                DumpModelSet(modelSet, path);
+                string name = Path.GetFileNameWithoutExtension(path);
+                DumpModelSet(modelSet, path, specDb, name);
                 return;
             }
         }
@@ -271,7 +333,8 @@ public class Dumper
                 fs.Position = 0x5180;
                 var modelSet = new ModelSet1();
                 modelSet.FromStream(fs);
-                DumpModelSet(modelSet, path);
+                string name = Path.GetFileNameWithoutExtension(path);
+                DumpModelSet(modelSet, path, specDb, name);
                 return;
             }
         }
@@ -335,7 +398,7 @@ public class Dumper
         string name = Path.GetFileNameWithoutExtension(path);
         string carModelOutput = Path.Combine(Path.GetDirectoryName(path), $"{name}_dump");
 
-        DumpModelSet(carModel.ModelSet, Path.Combine(carModelOutput, "CarModelSet"));
+        DumpModelSet(carModel.ModelSet, Path.Combine(carModelOutput, "CarModelSet"), null, null);
         DumpGT3Wheel(carModel.Wheel, Path.Combine(carModelOutput, "Wheel"));
         DumpGT3Tire(carModel.Tire, Path.Combine(carModelOutput, "Tire"));
         File.WriteAllText(Path.Combine(carModelOutput, "car_info.json"), carModel.CarInfo.AsJson());
@@ -379,7 +442,7 @@ public class Dumper
     {
         Console.WriteLine($"Dumping GT3 wheel file");
 
-        DumpModelSet(wheelFile.ModelSet, Path.Combine(dir, "Model"));
+        DumpModelSet(wheelFile.ModelSet, Path.Combine(dir, "Model"), null, null);
 
         var serializer = new SerializerBuilder()
            .WithNamingConvention(NullNamingConvention.Instance)
@@ -465,7 +528,7 @@ public class Dumper
         }
     }
 
-    static void DumpModelSet(ModelSetPS2Base modelSet, string dir)
+    static void DumpModelSet(ModelSetPS2Base modelSet, string dir, PDTools.SpecDB.Core.SpecDB specDb = null, string carName = null)
     {
         if (modelSet is null)
             return;
@@ -481,7 +544,32 @@ public class Dumper
             // Go through each variation of the model (variations alter the color of the model)
             for (int varIndex = 0; varIndex < numVars; varIndex++)
             {
-                string varDir = numVars == 1 ? dir : Path.Combine(dir, $"Var{varIndex}");
+                string varName = $"Var{varIndex}";
+                if (specDb != null && carName != null)
+                {
+                    try {
+                        var variationTable = specDb.Tables["CAR_VARIATION_" + specDb.LocaleName];
+                        if (!variationTable.IsLoaded) variationTable.LoadAllRows(specDb);
+                        var cvRows = variationTable.Rows.Where(r => r.Label == carName).ToList();
+                        if (varIndex < cvRows.Count)
+                        {
+                            int varId = (int)((PDTools.SpecDB.Core.Mapping.Types.DBInt)cvRows[varIndex].ColumnData[0]).Value;
+                            var varTable = specDb.Tables["VARIATION" + specDb.LocaleName];
+                            if (!varTable.IsLoaded) varTable.LoadAllRows(specDb);
+                            var varRow = varTable.Rows.FirstOrDefault(r => r.ID == varId);
+                            if (varRow != null)
+                            {
+                                var colorNameObj = (PDTools.SpecDB.Core.Mapping.Types.DBString)varRow.ColumnData[3];
+                                string colorName = specDb.LocaleStringDatabase.Strings[colorNameObj.StringIndex];
+                                foreach (char c in Path.GetInvalidFileNameChars()) colorName = colorName.Replace(c, '_');
+                                varName = colorName;
+                                Console.WriteLine($"SpecDB Resolved Variation Color: {varName}");
+                            }
+                        }
+                    } catch { }
+                }
+
+                string varDir = numVars == 1 ? dir : Path.Combine(dir, varName);
                 string textureOutputDir = Path.Combine(varDir, $"Textures");
                 Directory.CreateDirectory(textureOutputDir);
 
@@ -560,9 +648,34 @@ public class Dumper
     private static void DumpModelSetModel(ModelSetPS2Base modelSet, string dir, ModelSetConfig modelSetConfig, int varIndex, string varDir, int modelIndex)
     {
         Console.WriteLine($"Dumping model #{modelIndex}");
+        var ps2Model = modelSet.Models[modelIndex];
+        System.IO.File.AppendAllText(@"C:\Gt4\dump_stats.txt", $"[Dumper] Model {modelIndex} -> Total Shapes: {modelSet.GetNumShapes()}, Parsed Commands: {ps2Model.Commands.Count}\n");
 
         List<DumpedLOD> lods = modelSet.DumpModelLODs(modelIndex, dir);
         DumpModelLodsToObj(modelSet, lods, varIndex, varDir, $"model{modelIndex}");
+
+        // Collect all shape indices already extracted via command-tree walking
+        HashSet<int> extractedShapeIndices = new HashSet<int>();
+        foreach (var lod in lods)
+        {
+            foreach (var shape in lod.Shapes.Values)
+            {
+                extractedShapeIndices.Add(shape.ShapeIndex);
+            }
+        }
+
+        // Brute-force dump any remaining shapes not found via command tree
+        // (these are behind VM_Branch, unhandled CallModelCallback, etc.)
+        List<DumpedLOD> extraLods = modelSet.DumpAllShapes(modelIndex, extractedShapeIndices);
+        if (extraLods.Count > 0)
+        {
+            int extraCount = 0;
+            foreach (var lod in extraLods)
+                extraCount += lod.Shapes.Count;
+
+            Console.WriteLine($"  Found {extraCount} extra shapes not reached by command tree (VM/callback controlled)");
+            DumpModelLodsToObj(modelSet, extraLods, varIndex, varDir, $"model{modelIndex}.extra");
+        }
 
         if (varIndex == 0)
         {
@@ -793,6 +906,7 @@ public class Dumper
         {
             Console.WriteLine("Dumping CourseData->FlareTexture");
             DumpTextureSet(courseDataFile.FlareTexture, Path.Combine(dir, "FlareTexture"));
+        
         }
 
         if (courseDataFile.ParticleTexture != null)
@@ -818,5 +932,125 @@ public class Dumper
             Console.WriteLine("Dumping CourseData->FgSky");
             DumpModelSet(courseDataFile.FgSky, Path.Combine(dir, "FgSky"));
         }
+    }
+
+    public static string ResolveCarName(PDTools.SpecDB.Core.SpecDB specDb, string name)
+    {
+        string outName = $"{name}_dump";
+        if (specDb != null)
+        {
+            try {
+                var varTable = specDb.Tables["VARIATION" + specDb.LocaleName];
+                if (!varTable.IsLoaded) varTable.LoadAllRows(specDb);
+                
+                var varRow = varTable.Rows.FirstOrDefault(r => {
+                    var modelCodeStrIdx = ((PDTools.SpecDB.Core.Mapping.Types.DBString)r.ColumnData[0]).StringIndex;
+                    return specDb.LocaleStringDatabase.Strings[modelCodeStrIdx] == name;
+                });
+
+                if (varRow != null)
+                {
+                    int variationId = varRow.ID;
+                    var cvTable = specDb.Tables["CAR_VARIATION_" + specDb.LocaleName];
+                    if (!cvTable.IsLoaded) cvTable.LoadAllRows(specDb);
+                    
+                    var cvRow = cvTable.Rows.FirstOrDefault(r => ((PDTools.SpecDB.Core.Mapping.Types.DBInt)r.ColumnData[0]).Value == variationId);
+                    
+                    if (cvRow != null)
+                    {
+                        string genericLabel = cvRow.Label;
+                        string carDisplayName = genericLabel;
+                        
+                        var cnTable = specDb.Tables["CAR_NAME_" + specDb.LocaleName];
+                        if (cnTable != null) {
+                            if (!cnTable.IsLoaded) cnTable.LoadAllRows(specDb);
+                            var cnRow = cnTable.Rows.FirstOrDefault(r => r.Label == genericLabel);
+                            if (cnRow != null) {
+                                var strIdx = ((PDTools.SpecDB.Core.Mapping.Types.DBString)cnRow.ColumnData[0]).StringIndex;
+                                carDisplayName = specDb.LocaleStringDatabase.Strings[strIdx];
+                            }
+                        }
+
+                        // Normalize the name: lowercase, remove special characters, replace spaces/dashes with underscores
+                        carDisplayName = carDisplayName.ToLowerInvariant();
+                        carDisplayName = carDisplayName.Replace(".", "").Replace("'", "");
+                        carDisplayName = System.Text.RegularExpressions.Regex.Replace(carDisplayName, @"[^a-z0-9]", "_");
+                        carDisplayName = System.Text.RegularExpressions.Regex.Replace(carDisplayName, @"_+", "_").Trim('_');
+                        
+                        outName = $"{name}_{carDisplayName}";
+                        Console.WriteLine($"SpecDB Resolved Name: {outName}");
+                    }
+                    else {
+                        Console.WriteLine("Could not find CAR_VARIATION matching VariationID: " + variationId);
+                    }
+                }
+                else {
+                    Console.WriteLine($"Could not find {name} in VARIATIONamerican.");
+                }
+            } catch (Exception e) { Console.WriteLine($"SpecDB Error: {e.Message}"); }
+        }
+        return outName;
+    }
+
+    public static string ResolveCarTireName(PDTools.SpecDB.Core.SpecDB specDb, string name, bool rear)
+    {
+        if (specDb != null)
+        {
+            try {
+                var varTable = specDb.Tables["VARIATION" + specDb.LocaleName];
+                if (!varTable.IsLoaded) varTable.LoadAllRows(specDb);
+                
+                var varRow = varTable.Rows.FirstOrDefault(r => {
+                    var modelCodeStrIdx = ((PDTools.SpecDB.Core.Mapping.Types.DBString)r.ColumnData[0]).StringIndex;
+                    return specDb.LocaleStringDatabase.Strings[modelCodeStrIdx] == name;
+                });
+
+                if (varRow != null)
+                {
+                    int variationId = varRow.ID;
+                    var cvTable = specDb.Tables["CAR_VARIATION_" + specDb.LocaleName];
+                    if (!cvTable.IsLoaded) cvTable.LoadAllRows(specDb);
+                    
+                    var cvRow = cvTable.Rows.FirstOrDefault(r => ((PDTools.SpecDB.Core.Mapping.Types.DBInt)r.ColumnData[0]).Value == variationId);
+                    
+                    if (cvRow != null)
+                    {
+                        string genericLabel = cvRow.Label;
+                        
+                        var gcTable = specDb.Tables["GENERIC_CAR"];
+                        if (!gcTable.IsLoaded) gcTable.LoadAllRows(specDb);
+                        var gcRow = gcTable.Rows.FirstOrDefault(r => r.Label.Equals(genericLabel, StringComparison.OrdinalIgnoreCase));
+                        
+                        if (gcRow != null) {
+                            var dfTable = specDb.Tables["DEFAULT_PARTS"];
+                            if (!dfTable.IsLoaded) dfTable.LoadAllRows(specDb);
+                            string dfLabel = "df_pt_" + genericLabel;
+                            var dfRow = dfTable.Rows.FirstOrDefault(r => r.Label.Equals(dfLabel, StringComparison.OrdinalIgnoreCase));
+                            
+                            if (dfRow != null) {
+                                int tireId = -1;
+                                int targetType = rear ? 26 : 25; // FRONTTIRE is 25, REARTIRE is 26
+                                
+                                for(int i = 1; i < dfRow.ColumnData.Count; i+=2) {
+                                    if (int.TryParse(dfRow.ColumnData[i].ToString(), out int typeId) &&
+                                        int.TryParse(dfRow.ColumnData[i-1].ToString(), out int partId)) {
+                                        if (typeId == targetType) tireId = partId;
+                                    }
+                                }
+                                
+                                if (tireId != -1) {
+                                    string tableName = rear ? "REARTIRE" : "FRONTTIRE";
+                                    var tt = specDb.Tables[tableName];
+                                    if (!tt.IsLoaded) tt.LoadAllRows(specDb);
+                                    var ttRow = tt.Rows.FirstOrDefault(r => r.ID == tireId);
+                                    if (ttRow != null) return ttRow.Label;
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch { } // Ignore errors, fallback
+        }
+        return null;
     }
 }

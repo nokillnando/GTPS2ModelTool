@@ -1,0 +1,169 @@
+Info|----------------------------------------- 
+Info|- GTPS2ModelTool 1.1.0 by Nenkai 
+Info|----------------------------------------- 
+Info|- https://github.com/Nenkai 
+Info|- https://nenkai.github.io/gt-modding-hub/ 
+Info|----------------------------------------- 
+Info| 
+SpecDB Loaded for metadata mapping.
+[DEBUG ROOT] File magic: 34524143 | specDb is null? False
+SpecDB Resolved Name: fiat0002_fiat_panda_super_ie_90
+[DEBUG] Dumping CAR4 fiat0002 to C:\Gt4\tools\gt4fs\extracted\car\menu\fiat0002_fiat_panda_super_ie_90
+Dumping variation #0
+Dumping textures for lod 0
+Dumping texture index 0
+Dumping texture index 1
+Dumping texture index 2
+Dumping texture index 3
+Dumping texture index 4
+Dumping texture index 5
+Dumping texture index 6
+Dumping texture index 7
+Dumping texture index 8
+Dumping texture index 9
+Dumping texture index 10
+Dumping texture index 11
+Dumping texture index 12
+Dumping texture index 13
+Dumping texture index 14
+Dumping texture index 15
+Dumping texture index 16
+Dumping texture index 17
+Dumping texture index 18
+Dumping texture index 19
+Dumping texture index 20
+Dumping texture index 21
+Dumping texture index 22
+Dumping texture index 23
+Dumping texture index 24
+Dumping texture index 25
+Dumping texture index 26
+Dumping texture index 27
+Dumping texture index 28
+Dumping texture index 29
+Dumping texture index 30
+Dumping texture index 31
+Dumping texture index 32
+Dumping texture index 33
+Dumping texture index 34
+Dumping texture index 35
+Dumping texture index 36
+Dumping texture index 37
+Dumping texture index 38
+Dumping texture index 39
+Dumping texture index 40
+Dumping texture index 41
+Dumping texture index 42
+Dumping texture index 43
+Dumping texture index 44
+Dumping texture index 45
+Dumping texture index 46
+Dumping texture index 47
+Dumping texture index 48
+Dumping texture index 49
+Dumping texture index 50
+Dumping texture index 51
+Dumping texture index 52
+Dumping textures for lod 1
+Dumping textures for lod 2
+Dumping textures for lod 3
+Dumping textures for lod 4
+Dumping textures for lod 5
+Dumping texture index 0
+Dumping model #0
+[ProcessCommands] Unhandled opacity/render opcode: pglStoreFogColor
+[ProcessCommands] Unhandled opacity/render opcode: pglPushMatrix
+[ProcessCommands] Unhandled opacity/render opcode: pglPushMatrix
+[ProcessCommands] Unhandled opacity/render opcode: VMCallback_Byte
+[ProcessCommands] Unhandled opacity/render opcode: pglDisable19_14
+[ProcessCommands] Unhandled opacity/render opcode: pglPopMatrix
+[ProcessCommands] Unhandled opacity/render opcode: VMCallback_Byte
+[ProcessCommands] Unhandled opacity/render opcode: pglDisable19_14
+[ProcessCommands] Unhandled opacity/render opcode: pglPopMatrix
+[ProcessCommands] Unhandled opacity/render opcode: pglPushMatrix
+[ProcessCommands] Unhandled opacity/render opcode: pglPushMatrix
+[ProcessCommands] Unhandled opacity/render opcode: VMCallback_Byte
+[ProcessCommands] Unhandled opacity/render opcode: pglDisable19_14
+[ProcessCommands] Unhandled opacity/render opcode: pglPopMatrix
+[ProcessCommands] Unhandled opacity/render opcode: VMCallback_Byte
+[ProcessCommands] Unhandled opacity/render opcode: pglDisable19_14
+[ProcessCommands] Unhandled opacity/render opcode: pglPopMatrix
+[ProcessCommands] Unhandled opacity/render opcode: pglPushMatrix
+[ProcessCommands] Unhandled opacity/render opcode: pglPushMatrix
+[ProcessCommands] Unhandled opacity/render opcode: VMCallback_Byte
+[ProcessCommands] Unhandled opacity/render opcode: pglDisable19_14
+[ProcessCommands] Unhandled opacity/render opcode: pglPopMatrix
+[ProcessCommands] Unhandled opacity/render opcode: VMCallback_Byte
+[ProcessCommands] Unhandled opacity/render opcode: pglDisable19_14
+[ProcessCommands] Unhandled opacity/render opcode: pglPopMatrix
+[ProcessCommands] Unhandled opacity/render opcode: pglPushMatrix
+[ProcessCommands] Unhandled opacity/render opcode: pglPushMatrix
+[ProcessCommands] Unhandled opacity/render opcode: VMCallback_Byte
+[ProcessCommands] Unhandled opacity/render opcode: pglDisable19_14
+[ProcessCommands] Unhandled opacity/render opcode: pglPopMatrix
+[ProcessCommands] Unhandled opacity/render opcode: VMCallback_Byte
+[ProcessCommands] Unhandled opacity/render opcode: pglDisable19_14
+[ProcessCommands] Unhandled opacity/render opcode: pglPopMatrix
+[ProcessCommands] Unhandled opacity/render opcode: pglDisableCullFace
+[ProcessCommands] Unhandled opacity/render opcode: pglEnableCullFace
+[ProcessCommands] Unhandled opacity/render opcode: pgluTexTableFromExternalTexSetByte
+[ProcessCommands] Unhandled opacity/render opcode: pglDisableCullFace
+[ProcessCommands] Unhandled opacity/render opcode: pglEnableCullFace
+[ProcessCommands] Unhandled opacity/render opcode: pgluTexTableFromExternalTexSetByte
+[ProcessCommands] Unhandled opacity/render opcode: pgluTexTableFromExternalTexSetByte
+[ProcessCommands] Unhandled opacity/render opcode: pgluTexTableFromExternalTexSetByte
+  Found 4 extra shapes not reached by command tree (VM/callback controlled)
+Dumping model #1
+  Found 28 extra shapes not reached by command tree (VM/callback controlled)
+Dumping model #2
+[ProcessCommands] Unhandled opacity/render opcode: pglDisableCullFace
+[ProcessCommands] Unhandled opacity/render opcode: pglEnableCullFace
+  Found 28 extra shapes not reached by command tree (VM/callback controlled)
+Dumping model #3
+[ProcessCommands] Unhandled opacity/render opcode: pglStoreFogColor
+[ProcessCommands] Unhandled opacity/render opcode: pglPushMatrix
+[ProcessCommands] Unhandled opacity/render opcode: pglTranslate
+[ProcessCommands] Unhandled opacity/render opcode: pglRotateY
+[ProcessCommands] Unhandled opacity/render opcode: pglPopMatrix
+[ProcessCommands] Unhandled opacity/render opcode: pglPushMatrix
+[ProcessCommands] Unhandled opacity/render opcode: pglTranslate
+[ProcessCommands] Unhandled opacity/render opcode: pglRotateY
+[ProcessCommands] Unhandled opacity/render opcode: pglPopMatrix
+  Found 27 extra shapes not reached by command tree (VM/callback controlled)
+Dumping model set textures
+Creating model_set.yaml
+[DEBUG] Found default wheel fiat0002, extracting to C:\Gt4\tools\gt4fs\extracted\car\menu\fiat0002_fiat_panda_super_ie_90\wheel...
+[DEBUG ROOT] File magic: 534C444D | specDb is null? True
+Dumping variation #0
+Dumping textures for lod 0
+Dumping texture index 0
+Dumping model #0
+[ProcessCommands] Unhandled opacity/render opcode: pglStoreFogColor
+[ProcessCommands] Unhandled opacity/render opcode: pgluTexTableFromExternalTexSetByte
+Dumping model #1
+[ProcessCommands] Unhandled opacity/render opcode: pglStoreFogColor
+[ProcessCommands] Unhandled opacity/render opcode: pgluTexTableFromExternalTexSetByte
+Dumping model #2
+[ProcessCommands] Unhandled opacity/render opcode: pglStoreFogColor
+[ProcessCommands] Unhandled opacity/render opcode: pgluTexTableFromExternalTexSetByte
+Dumping model #3
+[ProcessCommands] Unhandled opacity/render opcode: pglStoreFogColor
+[ProcessCommands] Unhandled opacity/render opcode: pgluTexTableFromExternalTexSetByte
+Dumping model set textures
+Creating model_set.yaml
+[DEBUG-TIRE] EXCEPTION: Index was out of range. Must be non-negative and less than the size of the collection. (Parameter 'index')
+[DEBUG] Found tire model pdi_0000, extracting to C:\Gt4\tools\gt4fs\extracted\car\menu\fiat0002_fiat_panda_super_ie_90\tire...
+[DEBUG ROOT] File magic: 534C444D | specDb is null? True
+Dumping variation #0
+Dumping textures for lod 0
+Dumping texture index 0
+Dumping model #0
+[ProcessCommands] Unhandled opacity/render opcode: pglDisableCullFace
+[ProcessCommands] Unhandled opacity/render opcode: pglEnableCullFace
+  Found 1 extra shapes not reached by command tree (VM/callback controlled)
+Dumping model #1
+[ProcessCommands] Unhandled opacity/render opcode: pglDisableCullFace
+[ProcessCommands] Unhandled opacity/render opcode: pglEnableCullFace
+  Found 1 extra shapes not reached by command tree (VM/callback controlled)
+Dumping model set textures
+Creating model_set.yaml
