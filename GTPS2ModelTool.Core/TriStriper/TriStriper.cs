@@ -1,4 +1,7 @@
-﻿using SharpTriStrip;
+﻿// Copyright (c) 2026 Nenkai
+// SPDX-License-Identifier: MIT
+
+using SharpTriStrip;
 
 using System;
 using System.Collections.Generic;

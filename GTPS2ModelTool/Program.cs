@@ -1,4 +1,7 @@
-﻿using CommandLine;
+﻿// Copyright (c) 2026 Nenkai
+// SPDX-License-Identifier: MIT
+
+using CommandLine;
 
 using NLog;
 using YamlDotNet.Serialization.NamingConventions;
