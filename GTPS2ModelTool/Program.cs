@@ -19,7 +19,7 @@ internal class Program
 {
     private static Logger Logger = LogManager.GetCurrentClassLogger();
 
-    public const string Version = "1.1.0";
+    public const string Version = "1.1.1";
 
     static void Main(string[] args)
     {
