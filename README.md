@@ -18,12 +18,16 @@ For usage documentation, refer to the [Modding Hub](https://nenkai.github.io/gt-
 
 I am slowly retiring from GT research, but here are the current tasks left to be done
 
-* Tex1 Optimizations - heavily needed. Some paths mentioned [here](https://github.com/Nenkai/PDTools/blob/master/PDTools.Files/Textures/PS2/TextureSet1.cs)
+* **Tex1 Optimizations - HEAVILY NEEDED.** Some paths mentioned [here](https://github.com/Nenkai/PDTools/blob/master/PDTools.Files/Textures/PS2/TextureSet1.cs)
+  * The TextureSet format is a thin wrapper over the GS registers so they have full control over which GS areas/blocks textures go.
+  * PDI packs textures in a hyper-optimized manner over the obtuse GS memory layout such that no blocks goes unused, or even better, parts of the memory get reused for other textures or palettes.
+  * I've (Nenkai) tried to do optimizations by studying the way they do it, but we're still a good 1.5x above average gs texture block size consumption.
+  * For this reason, this tool can only be used to make really basic shapes or cars from scratch with less details.
 * Properly support reflective meshes?
 * More GT3 callbacks support
 * Greater PGLUmaterial support
 * Figure out the bounding bit in GT3 models
-* GT4 VM/Compiler?
+* GT4 support + VM/Compiler?
 
 ---
 
