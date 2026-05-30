@@ -9,7 +9,7 @@ A tool that allows creating **custom models** for Gran Turismo 3. Still in early
 > [!CAUTION]
 **TLDR: Building custom models is possible. Building models back from original models are not because repacked textures take too much space on the GS Memory. Texture memory layout optimizations are required (see Current Tasks below).**
 > * **It is not intended to be used for extracting (aka 'ripping') models out of the game. It is a modding tool.** No support whatsoever will be provided for such purposes.
-> * Rebuilding cars from scratch isn't possible without issues. Refer to the tasks below.
+> * Again, rebuilding cars from scratch isn't possible without issues. Refer to the tasks below.
 
 For usage documentation, refer to the [Modding Hub](https://nenkai.github.io/gt-modding-hub/ps2/models/). 
 
