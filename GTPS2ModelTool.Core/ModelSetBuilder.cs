@@ -13,7 +13,7 @@ using YamlDotNet.Serialization.NamingConventions;
 
 using NLog;
 
-using PDTools.Files.Models.PS2.Commands;
+using PDTools.Files.Models.PS2.RenderCommands;
 using PDTools.Files.Models.PS2;
 using PDTools.Files.Textures.PS2;
 using PDTools.Files.Models.PS2.ModelSet;
@@ -21,7 +21,6 @@ using PDTools.Files.Models.PS2.ModelSet;
 using GTPS2ModelTool.Core.WavefrontObj;
 using GTPS2ModelTool.Core.Config;
 using GTPS2ModelTool.Core.Config.Callbacks;
-using System.Diagnostics;
 
 namespace GTPS2ModelTool.Core;
 

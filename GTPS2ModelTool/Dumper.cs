@@ -12,7 +12,7 @@ using SixLabors.ImageSharp;
 using PDTools.Files.Courses.PS2;
 using PDTools.Files.Models.PS2.CarModel1;
 using PDTools.Files.Models.PS2.ModelSet;
-using PDTools.Files.Models.PS2.Commands;
+using PDTools.Files.Models.PS2.RenderCommands;
 using PDTools.Files.Models.PS2;
 using PDTools.Files.Textures.PS2;
 
