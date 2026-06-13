@@ -1,0 +1,8 @@
+<Solution>
+  <Project Path="GTPS2ModelTool.Core/GTPS2ModelTool.Core.csproj" />
+  <Project Path="GTPS2ModelTool/GTPS2ModelTool.csproj" />
+  <Project Path="PDTools/PDTools.Files/PDTools.Files.csproj" />
+  <Project Path="PDTools/PDTools.Hashing/PDTools.Hashing.csproj" />
+  <Project Path="PDTools/PDTools.Utils/PDTools.Utils.csproj" />
+  <Project Path="SharpTriStrip/SharpTriStrip.csproj" />
+</Solution>
